@@ -14,12 +14,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendMail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
+const handlebars_1 = __importDefault(require("handlebars"));
+const path_1 = __importDefault(require("path"));
+const fs_1 = __importDefault(require("fs"));
 const config_1 = require("../config");
 const promoDiscount_1 = __importDefault(require("../models/promoDiscount"));
 const oAuth2ClientServices_1 = require("../services/oAuth2ClientServices");
 const { CLIENT_ID, CLEINT_SECRET, REFRESH_TOKEN, OWNER_USER_EMAIL } = config_1.config;
 const sendMail = (req, res) => {
     const { email } = req.body;
+    const filePath = path_1.default.join(__dirname, '../public/example.html');
+    const source = fs_1.default.readFileSync(filePath, 'utf-8').toString();
+    const template = handlebars_1.default.compile(source);
+    const replacements = {
+        username: "Darth Vader"
+    };
+    const htmlToSend = template(replacements);
     function sendMail() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -42,10 +52,9 @@ const sendMail = (req, res) => {
                     to: email,
                     subject: 'Hello from gmail using API',
                     text: 'Hello from gmail email using API',
-                    html: '<h1 style="color: red;">{color: red tiene este h1}</h1>',
+                    html: htmlToSend
                 };
-                const result = yield transport.sendMail(mailOptions);
-                return result;
+                return yield transport.sendMail(mailOptions);
             }
             catch (error) {
                 return error;
