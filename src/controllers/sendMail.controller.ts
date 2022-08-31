@@ -1,13 +1,25 @@
 import { RequestHandler } from "express";
 import nodemailer from 'nodemailer'
-import { config } from "../config";
+import handlebars from 'handlebars'
+import path from "path";
+import fs from 'fs'
 
+import { config } from "../config";
 import promoModel from '../models/promoDiscount'
 import { oAuth2Client } from "../services/oAuth2ClientServices";
 const { CLIENT_ID, CLEINT_SECRET, REFRESH_TOKEN, OWNER_USER_EMAIL } = config;
 
 export const sendMail: RequestHandler = (req, res) => {
     const { email } = req.body
+
+
+    const filePath = path.join(__dirname, '../public/example.html');
+    const source = fs.readFileSync(filePath, 'utf-8').toString();
+    const template = handlebars.compile(source);
+    const replacements = {
+        username: "Darth Vader"
+    };
+    const htmlToSend = template(replacements);
 
     async function sendMail() {
         try {
@@ -32,11 +44,10 @@ export const sendMail: RequestHandler = (req, res) => {
                 to: email,
                 subject: 'Hello from gmail using API',
                 text: 'Hello from gmail email using API',
-                html: '<h1 style="color: red;">{color: red tiene este h1}</h1>',
+                html: htmlToSend
             };
 
-            const result = await transport.sendMail(mailOptions);
-            return result;
+            return await transport.sendMail(mailOptions);
         } catch (error) {
             return error;
         }
