@@ -50,10 +50,9 @@ export const sendMail: RequestHandler = async (req, res) => {
         const response = await transport.sendMail(mailOptions);
         console.log(response)
 
-        res.status(200).send({ ok: true })
+        res.status(200).send(response)
     } catch (error:any) {
         console.log(`<------${error}------>`)
-        res.status(400).send(error)
+        res.status(400).send({errors: [{msg: '!Opss ocurrio un error'}]})
     }
-
 }
